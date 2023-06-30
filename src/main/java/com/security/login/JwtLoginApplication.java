@@ -1,13 +1,13 @@
-package com.security.oauthlogin;
+package com.security.login;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class OauthLoginApplication {
+public class JwtLoginApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(OauthLoginApplication.class, args);
+		SpringApplication.run(JwtLoginApplication.class, args);
 	}
 
 }

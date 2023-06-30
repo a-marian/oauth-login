@@ -1,10 +1,10 @@
-package com.security.oauthlogin;
+package com.security.login;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class OauthLoginApplicationTests {
+class JwtLoginApplicationTests {
 
 	@Test
 	void contextLoads() {
