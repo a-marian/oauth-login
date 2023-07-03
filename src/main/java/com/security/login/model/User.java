@@ -8,6 +8,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 @Getter
@@ -32,8 +33,13 @@ public class User implements UserDetails {
     private String username;
     @Column(nullable = false)
     private String password;
-    @Transient
+    @Column(name="account_non_locked")
     private boolean accountNonLocked;
+    @Column(name = "lock_time")
+    private Date lockTime;
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name="attempt_id", referencedColumnName = "id")
+    private Attempt failedAttempts;
     @ManyToMany(fetch = FetchType.EAGER,
                 cascade= CascadeType.ALL)
     @JoinTable(name="user_roles",

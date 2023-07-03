@@ -11,7 +11,6 @@ spring:
       enabled: always
   datasource:
     driver-class-name: org.postgresql.Driver
-    platform: postgres
     url: jdbc:postgresql://localhost:5432/girasol
     username: postgres
     password: ENC(t0ADr6e0/4nZxomqfQCWRK2oIKgUIWO3)
@@ -19,5 +18,5 @@ spring:
     properties:
       hibernate:
         default_schema: girasol
-        ddl_auto: update
+        ddl_auto: create
         show_sql: true

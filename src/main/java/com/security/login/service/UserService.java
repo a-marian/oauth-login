@@ -21,4 +21,7 @@ public interface UserService extends UserDetailsService {
 
     void validateToken(String username);
 
+    void increaseFailedAttempts(User user);
+    void resetFailedAttempts(String mail);
+    void lock(User user);
 }

@@ -2,8 +2,10 @@ package com.security.login.service;
 
 import com.security.login.dto.UserRecord;
 import com.security.login.exception.UserNotSavedException;
+import com.security.login.model.Attempt;
 import com.security.login.model.Role;
 import com.security.login.model.User;
+import com.security.login.repository.AttemptsRepository;
 import com.security.login.repository.RoleRepository;
 import com.security.login.repository.UserRepository;
 import com.security.login.util.CustomPasswordEncoder;
@@ -16,9 +18,11 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 
 import javax.management.relation.RoleNotFoundException;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -32,15 +36,18 @@ public class UserServiceImpl implements UserService {
     private RoleRepository roleRepository;
     private CustomPasswordEncoder passwordEncoder;
     private JwtTokenUtil jwtTokenUtil;
+    private AttemptsRepository attemptsRepository;
 
     public UserServiceImpl(@Autowired UserRepository userRepository,
                            @Autowired RoleRepository roleRepository,
                            @Autowired CustomPasswordEncoder passwordEncoder,
-                           @Autowired JwtTokenUtil jwtTokenUtil){
+                           @Autowired JwtTokenUtil jwtTokenUtil,
+                           @Autowired AttemptsRepository attemptsRepository){
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.roleRepository = roleRepository;
         this.jwtTokenUtil = jwtTokenUtil;
+        this.attemptsRepository = attemptsRepository;
     }
     @Override
     public UserRecord save(UserRecord userRecord) throws UserNotSavedException {
@@ -104,5 +111,37 @@ public class UserServiceImpl implements UserService {
     @Override
     public void validateToken(String token){
         jwtTokenUtil.validate(token);
+    }
+
+    @Override
+    public void increaseFailedAttempts(User user) {
+       Attempt failedAttempts = user.getFailedAttempts();
+       if(failedAttempts != null){
+           int updatedFailedAttempts = failedAttempts.getCount()+1;
+           failedAttempts.setCount(updatedFailedAttempts);
+           attemptsRepository.save(failedAttempts);
+       } else {
+           Attempt newFailedAttempts = new Attempt();
+           newFailedAttempts.setUser(user);
+           newFailedAttempts.setCount(1);
+           newFailedAttempts.setUsername(user.getUsername());
+           attemptsRepository.save(newFailedAttempts);
+       }
+
+    }
+
+    @Override
+    public void resetFailedAttempts(String mail) {
+        Attempt attempts = attemptsRepository.findAttemptsByUsername(mail)
+                .orElseThrow(() -> new IllegalArgumentException("not attempts for this user"));
+        attempts.setCount(0);
+        attemptsRepository.save(attempts);
+    }
+
+    @Override
+    public void lock(User user) {
+        user.setAccountNonLocked(false);
+        user.setLockTime(new Date());
+        userRepository.save(user);
     }
 }

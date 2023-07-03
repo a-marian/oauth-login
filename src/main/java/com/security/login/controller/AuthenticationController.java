@@ -24,14 +24,16 @@ public class AuthenticationController {
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthenticationController.class);
     private static final String TOKEN_PREFIX = "Bearer";
     private UserService userService;
-    @Autowired
     private AuthenticationManager authenticationManager;
     private AttemptsRepository attemptsRepository;
 
 
-    public AuthenticationController(@Autowired UserService userService){
-        super();
+    public AuthenticationController(@Autowired UserService userService,
+                                    @Autowired AuthenticationManager authenticationManager,
+                                    @Autowired AttemptsRepository attemptsRepository){
         this.userService = userService;
+        this.authenticationManager = authenticationManager;
+        this.attemptsRepository = attemptsRepository;
     }
 
     @PostMapping("/register")
@@ -48,12 +50,9 @@ public class AuthenticationController {
     public ResponseEntity<String> login(@RequestBody LoginRecord loginRecord){
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRecord.usernameOrMail(), loginRecord.password()));
-        if(authentication.isAuthenticated()){
-            String token = userService.generateToken(loginRecord.usernameOrMail());
-            return  ResponseEntity.ok(token);
-        }
+        String token = userService.generateToken(loginRecord.usernameOrMail());
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        return new ResponseEntity<>("User signed-in successfully!", HttpStatus.OK);
+        return ResponseEntity.ok(token);
     }
 
     @GetMapping("/validate")
@@ -64,7 +63,7 @@ public class AuthenticationController {
     }
 
 
-    @GetMapping("find/{id}")
+    @GetMapping("/find/{id}")
     public UserRecord getUser(@PathVariable("id") long id){
         LOGGER.info("user to find:  {}", id );
         return userService.getUser(id);
