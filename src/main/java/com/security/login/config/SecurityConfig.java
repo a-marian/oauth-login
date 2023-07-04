@@ -1,6 +1,7 @@
 package com.security.login.config;
 
 
+import com.security.login.handler.LoginFailureHandler;
 import com.security.login.util.JwtAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -59,6 +60,11 @@ public class SecurityConfig {
     }
 
     @Bean
+    public LoginFailureHandler loginFailureHandler() {
+        return new LoginFailureHandler();
+    }
+
+    @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
             http
                 .csrf(AbstractHttpConfigurer::disable)
@@ -67,6 +73,7 @@ public class SecurityConfig {
                         .anyRequest().authenticated())
                 .logout(logout -> logout.invalidateHttpSession(true)
                         .clearAuthentication(true).permitAll());// authentication stored in securityContext will be cleared
+                http.formLogin().loginPage("/auth/login").failureHandler(loginFailureHandler());
             http.addFilterBefore(authenticationFilterBean(), UsernamePasswordAuthenticationFilter.class);
             return http.build();
     }
