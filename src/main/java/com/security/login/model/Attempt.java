@@ -6,15 +6,16 @@ import lombok.Setter;
 
 @Getter
 @Setter
-@Entity
-@Table(name="LOGIN_ATTEMPTS")
+@Entity(name="LOGIN_ATTEMPTS")
+@Table(name="loginAttempts")
 public class Attempt {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     private String username;
     private int count;
-    @OneToOne(mappedBy = "failedAttempts")
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="user_id")
     private User user;
 
 }

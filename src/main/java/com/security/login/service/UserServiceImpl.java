@@ -18,7 +18,6 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
 
 import javax.management.relation.RoleNotFoundException;
 import java.util.Collection;
@@ -115,7 +114,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void increaseFailedAttempts(User user) {
-       Attempt failedAttempts = user.getFailedAttempts();
+       Attempt failedAttempts = user.getLoginAttempts();
        if(failedAttempts != null){
            int updatedFailedAttempts = failedAttempts.getCount()+1;
            failedAttempts.setCount(updatedFailedAttempts);
@@ -143,5 +142,12 @@ public class UserServiceImpl implements UserService {
         user.setAccountNonLocked(false);
         user.setLockTime(new Date());
         userRepository.save(user);
+    }
+
+    @Override
+    public User findUser(String usernameOrMail) {
+        User user = userRepository.findByUsernameOrEmail(usernameOrMail, usernameOrMail)
+                .orElseThrow(() -> new UsernameNotFoundException("user was not found"));
+        return user;
     }
 }
